@@ -1,0 +1,141 @@
+
+
+<!DOCTYPE html>
+
+<html lang="az">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="theme-color" content="#020817">
+
+<title>J.A.R.V.I.S.</title>
+
+<style>
+
+*{box-sizing:border-box}
+
+body{margin:0;background:#020817;color:#c8f5ff;font-family:Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center}
+
+main{width:100%;padding:24px}
+
+h1{letter-spacing:5px;color:#61e7ff}
+
+#orb{width:190px;height:190px;border:2px solid #36cfff;border-radius:50%;margin:35px auto;box-shadow:0 0 25px #008cff,inset 0 0 30px #008cff;display:grid;place-items:center;animation:pulse 3s infinite}
+
+#orb span{font-size:56px}
+
+@keyframes pulse{50%{box-shadow:0 0 45px #008cff,inset 0 0 45px #008cff}}
+
+button,select{background:#06263d;color:#c8f5ff;border:1px solid #36cfff;border-radius:12px;padding:14px;margin:6px;font-size:16px}
+
+#status{min-height:42px;color:#8beaff}
+
+#answer{line-height:1.6;white-space:pre-wrap}
+
+</style>
+
+</head>
+
+<body>
+
+<main>
+
+<h1>J.A.R.V.I.S.</h1>
+
+<p>PERSONAL AI ASSISTANT</p>
+
+<div id="orb"><span>J</span></div>
+
+<p id="status">Sistem hazırdır</p>
+
+<select id="lang">
+
+<option value="az-AZ">Azərbaycan dili</option>
+
+<option value="tr-TR">Türkçe</option>
+
+</select>
+
+<br>
+
+<button id="speak">🎙 Danış</button>
+
+<button id="hello">✦ Salam ver</button>
+
+<p id="answer">Mən JARVIS. Səni dinləməyə hazıram.</p>
+
+<script>
+
+const statusEl=document.getElementById('status');
+
+const answer=document.getElementById('answer');
+
+const lang=document.getElementById('lang');
+
+function say(text){
+
+ answer.textContent=text;
+
+ if(!('speechSynthesis' in window)){statusEl.textContent='Səsli cavab bu brauzerdə dəstəklənmir';return}
+
+ speechSynthesis.cancel();
+
+ const u=new SpeechSynthesisUtterance(text);
+
+ u.lang=lang.value;
+
+ u.rate=0.92;
+
+ speechSynthesis.speak(u);
+
+}
+
+document.getElementById('hello').onclick=()=>say(lang.value==='tr-TR'?'Merhaba. JARVIS hazır.':'Salam. JARVIS hazırdır.');
+
+document.getElementById('speak').onclick=()=>{
+
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+
+ if(!SR){statusEl.textContent='Səs tanıma bu brauzerdə dəstəklənmir. Salam ver düyməsini yoxla.';return}
+
+ const r=new SR();r.lang=lang.value;r.interimResults=false;
+
+ statusEl.textContent='Səni dinləyirəm...';
+
+ r.onresult=e=>{
+
+  const t=e.results[0][0].transcript;
+
+  statusEl.textContent='Eşidildi: '+t;
+
+  const s=t.toLowerCase();
+
+  if(s.includes('salam')||s.includes('merhaba'))say(lang.value==='tr-TR'?'Merhaba. Sana nasıl yardımcı olabilirim?':'Salam. Sənə necə kömək edə bilərəm?');
+
+  else if(s.includes('adın')||s.includes('ismin'))say(lang.value==='tr-TR'?'Ben JARVIS.':'Mən JARVISəm.');
+
+  else if(s.includes('saat'))say('Telefonundakı saatı yoxla. Hələ internet bağlantılı süni intellekt qoşulmayıb.');
+
+  else say(lang.value==='tr-TR'?'Komutunu duydum: '+t+'. Şu anda çevrimdışı deneme modundayım.':'Əmrini eşitdim: '+t+'. Hazırda sınaq rejimindəyəm.');
+
+ };
+
+ r.onerror=()=>statusEl.textContent='Mikrofon işləmədi. İcazələri yoxla.';
+
+ r.onend=()=>{if(statusEl.textContent==='Səni dinləyirəm...')statusEl.textContent='Dinləmə bitdi';};
+
+ try{r.start()}catch(e){statusEl.textContent='Yenidən cəhd et.'}
+
+};
+
+</script>
+
+</main>
+
+</body>
+
+</html>
